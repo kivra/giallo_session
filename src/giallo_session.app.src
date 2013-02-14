@@ -1,0 +1,12 @@
+{application, giallo_session,
+ [
+  {description, "Giallo session manager"},
+  {vsn, "0.0.1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { giallo_session_app, []}},
+  {env, []}
+ ]}.
