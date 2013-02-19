@@ -51,7 +51,7 @@ new(Req) ->
 get(Key, Req, Default) ->
     case get_sid(Req) of
         undefined ->
-            error(badarg);
+            Default;
         Sid ->
             ?BACKEND:get(Key, Sid, Default)
     end.
@@ -88,7 +88,7 @@ exists(Req) ->
 clear(Req) ->
     case get_sid(Req) of
         undefined ->
-            error(badarg);
+            ok;
         Sid ->
             ?BACKEND:clear(Sid)
     end.
