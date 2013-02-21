@@ -99,9 +99,9 @@ clear(Req) ->
 %% @private
 get_sid(Req) ->
     SidName = giallo_session_config:cookie_name(),
-    case cowboy_req:cookie(SidName, Req) of
+    case cowboy_req:meta(SidName, Req) of
         {undefined, Req1} ->
-            case cowboy_req:meta(SidName, Req1) of
+            case cowboy_req:cookie(SidName, Req1) of
                 {undefined, _Req} -> undefined;
                 {Sid, _Req}       -> Sid
             end;
