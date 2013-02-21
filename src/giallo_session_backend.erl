@@ -33,7 +33,7 @@
 -callback new(Sid) -> ok when
       Sid :: binary().
 
--callback get(Key, Sid, Default) -> Value when
+-callback get(Key, Sid, Default) -> Value | undefined when
       Key     :: any(),
       Sid     :: binary(),
       Default :: any(),
