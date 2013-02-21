@@ -60,7 +60,7 @@ get(Key, Sid, Default) ->
                     Default
             end;
         error ->
-            error(badarg) %% No running session
+             undefined %% No running session
     end.
 
 -spec set(any(), any(), binary()) -> ok.
