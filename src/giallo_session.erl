@@ -33,6 +33,7 @@
 -export([clear/1]).
 
 -define(BACKEND, (giallo_session_config:backend())).
+-define(COOKIE_OPTS, [{path, <<"/">>}]).
 
 %%% API ------------------------------------------------------------------------
 
@@ -44,7 +45,7 @@ new(Req) ->
     Sid = generate_sid(),
     ok = ?BACKEND:new(Sid),
     Req1 = cowboy_req:set_meta(SidName, Sid, Req),
-    cowboy_req:set_resp_cookie(SidName, Sid, [], Req1).
+    cowboy_req:set_resp_cookie(SidName, Sid, ?COOKIE_OPTS, Req1).
 
 %% @doc Gets the value of a session property.
 %% If no session exists, the behaviour is undefined.
