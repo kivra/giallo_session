@@ -43,7 +43,8 @@ new(Req) ->
     SidName = giallo_session_config:cookie_name(),
     Sid = generate_sid(),
     ok = ?BACKEND:new(Sid),
-    cowboy_req:set_resp_cookie(SidName, Sid, [], Req).
+    Req1 = cowboy_req:set_meta(SidName, Sid, Req),
+    cowboy_req:set_resp_cookie(SidName, Sid, [], Req1).
 
 %% @doc Gets the value of a session property.
 %% If no session exists, the behaviour is undefined.
@@ -99,8 +100,11 @@ clear(Req) ->
 get_sid(Req) ->
     SidName = giallo_session_config:cookie_name(),
     case cowboy_req:cookie(SidName, Req) of
-        {undefined, _Req} ->
-            undefined;
+        {undefined, Req1} ->
+            case cowboy_req:meta(SidName, Req1) of
+                {undefined, _Req} -> undefined;
+                {Sid, _Req}       -> Sid
+            end;
         {Sid, _Req} ->
             Sid
     end.
