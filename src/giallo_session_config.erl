@@ -28,6 +28,7 @@
 %%% API
 -export([backend/0]).
 -export([cookie_name/0]).
+-export([ttl/0]).
 
 %%% API ------------------------------------------------------------------------
 
@@ -38,6 +39,10 @@ backend() ->
 -spec cookie_name() -> binary().
 cookie_name() ->
     get_env(cookie_name, <<"sid">>).
+
+-spec ttl() -> non_neg_integer().
+ttl() ->
+    get_env(ttl, 3600). % Default to keeping inactive sessions around for 1h
 
 %%% Internal -------------------------------------------------------------------
 
