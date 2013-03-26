@@ -33,6 +33,8 @@
 %%% Supervisor callbacks
 -export([init/1]).
 
+-define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
+
 %%% API ------------------------------------------------------------------------
 
 start_link() ->
@@ -41,4 +43,5 @@ start_link() ->
 %%% Supervisor callbacks -------------------------------------------------------
 
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, []} }.
+    Children = [?CHILD(giallo_session_reaper, worker)],
+    {ok, { {one_for_one, 5, 10}, Children} }.

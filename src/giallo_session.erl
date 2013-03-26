@@ -44,6 +44,7 @@ new(Req) ->
     SidName = giallo_session_config:cookie_name(),
     Sid = generate_sid(),
     ok = ?BACKEND:new(Sid),
+    giallo_session_reaper:register(Sid),
     Req1 = cowboy_req:set_meta(SidName, Sid, Req),
     cowboy_req:set_resp_cookie(SidName, Sid, ?COOKIE_OPTS, Req1).
 
@@ -55,6 +56,7 @@ get(Key, Req, Default) ->
         undefined ->
             Default;
         Sid ->
+            keep_alive(Sid),
             ?BACKEND:get(Key, Sid, Default)
     end.
 
@@ -73,6 +75,7 @@ set(Key, Value, Req) ->
         undefined ->
             error(badarg);
         Sid ->
+            keep_alive(Sid),
             ?BACKEND:set(Key, Value, Sid)
     end.
 
@@ -82,6 +85,7 @@ exists(Req) ->
         undefined ->
             false;
         Sid ->
+            keep_alive(Sid),
             ?BACKEND:exists(Sid)
     end.
 
@@ -92,6 +96,7 @@ clear(Req) ->
         undefined ->
             ok;
         Sid ->
+            giallo_session_reaper:unregister(Sid),
             ?BACKEND:clear(Sid)
     end.
 
@@ -133,3 +138,9 @@ is_alphanum(C) when C >= $A andalso C =< $Z ->
     true;
 is_alphanum(_) ->
     false.
+
+%% @private
+-spec keep_alive(binary()) -> ok.
+keep_alive(Sid) ->
+    giallo_session_reaper:touch(Sid),
+    ok.

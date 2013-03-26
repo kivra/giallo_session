@@ -85,7 +85,7 @@ exists(Sid) ->
 
 -spec clear(binary()) -> ok.
 clear(Sid) ->
-    true = ets:delete(?TABLE, Sid),
+    ets:delete(?TABLE, Sid),
     ok.
 
 %%% Internal -------------------------------------------------------------------
