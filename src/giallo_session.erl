@@ -27,7 +27,7 @@
 
 %%% API
 -export([new/1]).
--export([get/2, get/3]).
+-export([get/2]).
 -export([set/3]).
 -export([exists/1]).
 -export([clear/1]).
@@ -52,20 +52,24 @@ new(Req) ->
 %% If no session exists, the behaviour is undefined.
 %% @see exists/1
 get(Key, Req, Default) ->
-    case get_sid(Req) of
-        undefined ->
+    case catch get(Key, Req) of
+        undefined_sid ->
             Default;
-        Sid ->
-            keep_alive(Sid),
-            ?BACKEND:get(Key, Sid, Default)
+        Value ->
+            Value
     end.
 
-%% @doc Gets the value of a session property, defaulting to undefined.
+%% @doc Gets the value of a session property.
 %% If no session exists, the behaviour is undefined.
 %% @see exists/1
-%% @equiv get(Key, Req, undefined).
 get(Key, Req) ->
-    get(Key, Req, undefined).
+    case get_sid(Req) of
+        undefined ->
+            throw(undefined_sid);
+        Sid ->
+            keep_alive(Sid),
+            ?BACKEND:get(Key, Sid, undefined)
+    end.
 
 %% @doc Sets the value of a session property.
 %% If no session exists, the behaviour is undefined.
