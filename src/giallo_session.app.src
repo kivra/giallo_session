@@ -1,7 +1,7 @@
 {application, giallo_session,
  [
   {description, "Giallo session manager"},
-  {vsn, "0.0.1"},
+  {vsn, "0.1.0"},
   {registered, []},
   {applications, [
                   kernel,
