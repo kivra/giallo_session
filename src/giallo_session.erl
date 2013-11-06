@@ -26,7 +26,7 @@
 -module(giallo_session).
 
 %%% API
--export([new/1]).
+-export([new/1, new/2]).
 -export([get/2, get/3]).
 -export([set/3]).
 -export([exists/1]).
@@ -41,12 +41,15 @@
 %% session cookie in the response section.
 %% @see exists/1
 new(Req) ->
+    new(Req, ?COOKIE_OPTS).
+
+new(Req, CookieOpts) ->
     SidName = giallo_session_config:cookie_name(),
     Sid = generate_sid(),
     ok = ?BACKEND:new(Sid),
     giallo_session_reaper:register(Sid),
     Req1 = cowboy_req:set_meta(SidName, Sid, Req),
-    cowboy_req:set_resp_cookie(SidName, Sid, ?COOKIE_OPTS, Req1).
+    cowboy_req:set_resp_cookie(SidName, Sid, CookieOpts, Req1).
 
 %% @doc Gets the value of a session property.
 %% If no session exists, the behaviour is undefined.
