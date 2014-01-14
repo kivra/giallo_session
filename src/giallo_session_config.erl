@@ -28,6 +28,7 @@
 %%% API
 -export([backend/0]).
 -export([cookie_name/0]).
+-export([cookie_options/0]).
 -export([ttl/0]).
 
 %%% API ------------------------------------------------------------------------
@@ -39,6 +40,10 @@ backend() ->
 -spec cookie_name() -> binary().
 cookie_name() ->
     get_env(cookie_name, <<"sid">>).
+
+-spec cookie_options() -> cow_cookie:cookie_opts().
+cookie_options() ->
+    get_env(cookie_options, []).
 
 -spec ttl() -> non_neg_integer().
 ttl() ->

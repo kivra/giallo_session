@@ -33,7 +33,6 @@
 -export([clear/1]).
 
 -define(BACKEND, (giallo_session_config:backend())).
--define(COOKIE_OPTS, [{path, <<"/">>}]).
 
 %%% API ------------------------------------------------------------------------
 
@@ -41,7 +40,7 @@
 %% session cookie in the response section.
 %% @see exists/1
 new(Req) ->
-    new(Req, ?COOKIE_OPTS).
+    new(Req, []).
 
 new(Req, CookieOpts) ->
     SidName = giallo_session_config:cookie_name(),
@@ -49,7 +48,20 @@ new(Req, CookieOpts) ->
     ok = ?BACKEND:new(Sid),
     giallo_session_reaper:register(Sid),
     Req1 = cowboy_req:set_meta(SidName, Sid, Req),
-    cowboy_req:set_resp_cookie(SidName, Sid, CookieOpts, Req1).
+    %% Prepare CookieOpts values
+    {HTTPS, Req2} = is_https(Req1),
+    DefaultCookieOpts = lists:ukeysort(1, [{path, <<"/">>}, {http_only, true},
+                                           {secure, HTTPS}]),
+    ConfCookieOpts = lists:ukeysort(1, giallo_session_config:cookie_options()),
+    ParamCookieOpts = lists:ukeysort(1, CookieOpts),
+    %% Merge CookieOpts (Parameter overrides Config overrides Defaults)
+    CookieOpts1 = lists:ukeymerge(1, ConfCookieOpts, DefaultCookieOpts),
+    CookieOpts2 = lists:ukeymerge(1, ParamCookieOpts, CookieOpts1),
+    %% These may be set to false to override Config/Default values,
+    %% but Cowboy can't handle that, so strip them if false
+    CookieOptsD1 = lists:delete({http_only, false}, CookieOpts2),
+    CookieOptsD2 = lists:delete({secure, false}, CookieOptsD1),
+    cowboy_req:set_resp_cookie(SidName, Sid, CookieOptsD2, Req2).
 
 %% @doc Gets the value of a session property.
 %% If no session exists, the behaviour is undefined.
@@ -141,6 +153,20 @@ is_alphanum(C) when C >= $A andalso C =< $Z ->
     true;
 is_alphanum(_) ->
     false.
+
+%% @private
+is_https(Req) ->
+    case cowboy_req:header(<<"x-forwarded-proto">>, Req) of
+        {undefined, Req1} ->
+            %% Cowboy doesn't currently provide direct access to the
+            %% transport, so get it via host_url()
+            case cowboy_req:host_url(Req1) of
+                {<<"https", _Rest/binary>>, Req2} -> {true, Req2};
+                {_, Req2} -> {false, Req2}
+            end;
+        {Proto, Req1} ->
+            {Proto =:= <<"https">>, Req1}
+    end.
 
 %% @private
 -spec keep_alive(binary()) -> ok.
