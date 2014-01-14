@@ -95,7 +95,7 @@ handle_cast({Request, Sid}, #state{live=Live0}=State0) ->
     {noreply, State1}.
 
 handle_info(?TIMER_MESSAGE, #state{live=Live0}=State0) ->
-    {ok,TTL} = giallo_session_config:ttl(),
+    TTL = giallo_session_config:ttl(),
     Live1 = dict:fold(
               fun(Sid, Time, Live) ->
                       case seconds_since(Time) > TTL of
