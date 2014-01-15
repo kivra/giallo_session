@@ -52,6 +52,6 @@ get_env(Key, Default) ->
     case application:get_env(giallo_session, Key) of
         undefined ->
             Default;
-        Value ->
+        {ok, Value} ->
             Value
     end.
